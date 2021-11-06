@@ -5,6 +5,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Vector;
+import javax.swing.ComboBoxModel;
+import javax.swing.DefaultComboBoxModel;
 
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
@@ -16,9 +18,43 @@ public class DBUpdater {
     String password = "123456";
 
     //INSERT INTO DB
-    public Boolean add(String HD, String KH, String ngayLap,String tongTien) {
+    public Boolean add_2(Object [][] tabledata,int row,int col){
+        String sql = "Insert INTO CT_HOADON VALUES(";
+        for(int  i =0;i<row;i++){
+            sql+="'";
+            int j = 0;
+            for (;j<col;j++){
+                sql+=(String)tabledata[i][j]+"','";
+            }
+            sql = sql.substring(0,sql.length()-2);
+            sql+=",null";
+            sql+="),(";
+            
+        }
+        sql=sql.substring(0, sql.length()-2);
+        try {
+            //GET COONECTION
+        	
+        	
+        	
+        	Connection con = DriverManager.getConnection(conString, username, password);
+            
+
+            // PREPARED STMT
+        	Statement s = con.createStatement();
+
+            s.execute(sql);
+
+            return true;
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        return false;
+    }
+    public Boolean add(String HD, String KH, String ngayLap) {
         //SQL STATEMENT
-        String sql = "INSERT INTO HOADON VALUES('" + HD + "','" + KH + "','" + ngayLap + "','"+tongTien+"')";
+        String sql = "INSERT INTO HOADON VALUES('" + HD + "','" + KH + "','" + ngayLap + "',null)";
 
         try {
             //GET COONECTION
@@ -40,7 +76,30 @@ public class DBUpdater {
         }
         return false;
     }
-    
+    public Boolean addKH(String maKH, String ho, String ten,String ngaySinh,String soNha,String duong,String phuong,String quan,String thanhPho,String sdt) {
+        //SQL STATEMENT
+        String sql = "INSERT INTO KHACHHANG VALUES('" + maKH + "','" + ho + "','" + ten + "','"+ngaySinh+"','"+soNha+"','"+duong+"','"+phuong+"','"+quan+"','"+thanhPho+"','"+sdt+"')";
+
+        try {
+            //GET COONECTION
+        	
+        	
+        	
+        	Connection con = DriverManager.getConnection(conString, username, password);
+            
+
+            // PREPARED STMT
+        	Statement s = con.createStatement();
+
+            s.execute(sql);
+
+            return true;
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        return false;
+    }
     //RETRIEVE DATA
     @SuppressWarnings("deprecation")
 	public DefaultTableModel getData() {
@@ -184,12 +243,162 @@ public DefaultTableModel xuatTheoThang(String month,String year) {
         return null;
     }
 
+    public String getPriceofID(String ID){
+        String sql = "Select * From SanPham WHERE MaSp ='"+ID+"'";
+        try
+        {
+            //GET CONNECTION
+            Connection con=DriverManager.getConnection(conString, username, password);
 
+            //STATEMENT
+            Statement s = con.createStatement();
+
+            //EXECUTE
+            ResultSet rs = s.executeQuery(sql);
+            rs.next();
+
+            String ans = rs.getString(5);
+            return ans;
+
+        }catch(Exception ex)
+        {
+            ex.printStackTrace();
+            return null;
+        }
+    }
+    public ComboBoxModel  getCustomerID(){
+        String sql = "Select * FROM KhachHang";
+        try
+        {
+            //GET CONNECTION
+            Connection con=DriverManager.getConnection(conString, username, password);
+
+            //STATEMENT
+            Statement s = con.createStatement();
+
+            //EXECUTE
+            ResultSet rs = s.executeQuery(sql);
+            Vector <String> ans = new Vector();
+            int index =0;
+                
+            while (rs.next()){
+                ans.add(rs.getString(1));
+            }
+            return new DefaultComboBoxModel (ans);
+
+        }catch(Exception ex)
+        {
+            ex.printStackTrace();
+            return null;
+        }
+    }
+    public ComboBoxModel  getSuppliesID(){
+        String sql = "Select * FROM SanPham";
+        try
+        {
+            //GET CONNECTION
+            Connection con=DriverManager.getConnection(conString, username, password);
+
+            //STATEMENT
+            Statement s = con.createStatement();
+
+            //EXECUTE
+            ResultSet rs = s.executeQuery(sql);
+            Vector <String> ans = new Vector();
+            int index =0;
+                
+            while (rs.next()){
+                ans.add(rs.getString(1));
+            }
+            return new DefaultComboBoxModel (ans);
+
+        }catch(Exception ex)
+        {
+            ex.printStackTrace();
+            return null;
+        }
+    }
+    public String  getSuppliesCount(String id){
+        String sql = "Select * FROM SanPham Where MaSp ='"+id+"'";
+        try
+        {
+            //GET CONNECTION
+            Connection con=DriverManager.getConnection(conString, username, password);
+
+            //STATEMENT
+            Statement s = con.createStatement();
+
+            //EXECUTE
+            ResultSet rs = s.executeQuery(sql);
+            
+            
+                
+            rs.next();
+            String ans = rs.getString(3);
+            return ans;
+            
+
+        }catch(Exception ex)
+        {
+            ex.printStackTrace();
+            return null;
+        }
+    }
     //DELETE DATA
-    public Boolean delete(String id)
+    public Boolean updateSupplies(String idSp,String soLuong){
+        String sql = "Update SANPHAM SET SOLUONGTON = SOLUONGTON - "+soLuong+" WHERE MASP = '"+idSp+"'";
+        try
+        {
+            //GET CONNECTION
+            Connection con=DriverManager.getConnection(conString, username, password);
+
+            //STATEMENT
+            Statement s = con.createStatement();
+
+            //EXECUTE
+            
+            s.execute(sql);
+            
+            
+            return true;
+
+        }catch(Exception ex)
+        {
+            ex.printStackTrace();
+            return false;
+        }
+    }
+    public Boolean checkMaKH(String idKH){
+        String sql = "Select Count(*) AS DEM FROM KHACHHANG WHERE MaKH ='"+idKH+"'";
+        try
+        {
+            //GET CONNECTION
+            Connection con=DriverManager.getConnection(conString, username, password);
+
+            //STATEMENT
+            Statement s = con.createStatement();
+
+            //EXECUTE
+            ResultSet rs = s.executeQuery(sql);
+            rs.next();
+            int ans =  Integer.parseInt(rs.getString("Dem"));
+            if(ans ==0) return false;
+            
+            
+            return true;
+
+        }catch(Exception ex)
+        {
+            ex.printStackTrace();
+            return false;
+        }
+    }
+    
+    public Boolean delete(String idHD)
     {
         //SQL STMT
-        String sql="DELETE FROM HOADON WHERE MaHD ='"+id+"'";
+        String sql_1 = "Delete FROM CT_HOADON WHERE MaHD='"+idHD+"'";
+        String sql="DELETE FROM HOADON WHERE MaHD ='"+idHD+"'";
 
         try
         {
@@ -200,6 +409,7 @@ public DefaultTableModel xuatTheoThang(String month,String year) {
             Statement s = con.createStatement();
 
             //EXECUTE
+            s.execute(sql_1);
             s.execute(sql);
 
             return true;
