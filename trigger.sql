@@ -1,0 +1,48 @@
+/* 
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Other/SQLTemplate.sql to edit this template
+ */
+/**
+ * Author:  84978
+ * Created: Jan 4, 2022
+ */
+
+use[QLSP]
+
+GO
+create or alter TRIGGER [dbo].[TINH_TONGTIEN]
+ON [dbo].[CT_HOADON] AFTER INSERT
+AS
+BEGIN
+	
+	UPDATE dbo.HOADON 
+	SET HOADON.TONGTIEN =HOADON.TONGTIEN+ CT_HOADON.THANHTIEN
+	FROM HOADON,CT_HOADON,inserted
+	WHERE inserted.MAHD=CT_HOADON.MAHD AND CT_HOADON.MASP=inserted.MASP AND inserted.MAHD=HOADON.MAHD
+END
+
+
+Go
+create or alter TRIGGER  CT_DONHANG_SANPHAM
+ON [dbo].[CT_HOADON] AFTER INSERT
+AS
+BEGIN
+	
+	UPDATE SANPHAM
+	SET SANPHAM.SOLUONGTON =SANPHAM.SOLUONGTON-inserted.SOLUONG
+	FROM SANPHAM,inserted
+	WHERE inserted.MASP=SANPHAM.MASP
+END
+GO
+create or alter TRIGGER [dbo].[TINH_THANHTIEN]
+ON [dbo].[CT_HOADON] AFTER INSERT
+AS
+BEGIN
+	UPDATE dbo.CT_HOADON
+	
+	SET THANHTIEN= (SANPHAM.GIA-CT_HOADON.GIAGIAM)*CT_HOADON.SOLUONG, GIABAN = SANPHAM.GIA
+	FROM CT_HOADON,SANPHAM,inserted
+	WHERE   CT_HOADON.MAHD=inserted.MaHD AND CT_HOADON.MASP=inserted.MASP AND inserted.MASP=SANPHAM.MASP
+END
+
+UPDATE SANPHAM SET SOLUONGTON=-SOLUONGTON +10000 WHERE SOLUONGTON<5000
